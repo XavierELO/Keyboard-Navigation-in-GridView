@@ -33,6 +33,7 @@ class _MyGridViewState extends State<MyGridView> {
   int _crossAxisCount = 5;
   int _focusedIndex = 0;
   late List<FocusNode> _focusNodes;
+  late ScrollController _scrollController;
 
   @override
   void initState() {
@@ -42,11 +43,13 @@ class _MyGridViewState extends State<MyGridView> {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _focusNodes[_focusedIndex].requestFocus();
     });
+    _scrollController = ScrollController();
   }
 
   @override
   void dispose() {
     _focusNodes.forEach((node) => node.dispose());
+    _scrollController.dispose();
     super.dispose();
   }
 
@@ -77,6 +80,10 @@ class _MyGridViewState extends State<MyGridView> {
           _focusedIndex = newIndex;
           _focusNodes[_focusedIndex].requestFocus();
         });
+        WidgetsBinding.instance?.addPostFrameCallback((_) {
+          Scrollable.ensureVisible(_focusNodes[_focusedIndex].context!,
+              duration: Duration(milliseconds: 200), curve: Curves.easeInOut);
+        });
       }
     }
     return KeyEventResult.handled;
@@ -85,6 +92,7 @@ class _MyGridViewState extends State<MyGridView> {
   @override
   Widget build(BuildContext context) {
     return GridView.builder(
+      controller: _scrollController,
       itemCount: 50,
       gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
         crossAxisCount: _crossAxisCount,
